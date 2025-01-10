@@ -1,0 +1,128 @@
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
+
+class Carro {
+private:
+    int rpm;               // Rotações do motor (RPM)
+    float temperatura;     // Temperatura do motor (em °C)
+    bool freioDeMao;       // Indicador de se o freio de mão está engatado
+
+public:
+    // Construtor
+    Carro() : rpm(1500), temperatura(90.0), freioDeMao(false) {}
+
+    // Função para acelerar
+    void acelerar(int incremento) {
+        if (freioDeMao) {
+            cout << "Não é possível acelerar com o freio de mão engatado!\n";
+            return;
+        }
+
+        rpm += incremento;
+        if (rpm > 6500) rpm = 6500; // Limitar o RPM máximo a 6500
+        if (rpm < 0) rpm = 0; // Garantir que o RPM não fique negativo
+        cout << "RPM atual: " << rpm << " RPM\n";
+        ajustarTemperatura();
+    }
+
+    // Função para acionar o freio de mão
+    void acionarFreioDeMao() {
+        freioDeMao = true;
+        cout << "Freio de mão engatado! Não é possível acelerar.\n";
+    }
+
+    // Função para liberar o freio de mão
+    void liberarFreioDeMao() {
+        freioDeMao = false;
+        cout << "Freio de mão liberado.\n";
+    }
+
+    // Função para ajustar a temperatura com base nas rotações
+    void ajustarTemperatura() {
+        if (rpm <= 4000) {
+            // Abaixo de 4000 RPM, a temperatura é 90°C
+            temperatura = 90;
+        } else if (rpm > 4000 && rpm <= 6000) {
+            // Interpolação linear entre 4000 e 6000 RPM, para a temperatura de 90°C a 130°C
+            temperatura = 90 + (rpm - 4000) * (130 - 90) / (6000 - 4000);
+        } else if (rpm > 6000 && rpm <= 6500) {
+            // Entre 6000 e 6500 RPM, aumenta 5°C por cada incremento
+            temperatura = 130 + (rpm - 6000) * 5 / 500; // Cada incremento de RPM acima de 6000 aumenta 5°C
+        } else {
+            // Se o RPM passar de 6500, o motor avaria
+            cout << "ALERTA: RPM acima de 6500! O motor avariou!\n";
+            rpm = 0; // O motor avariou, coloca RPM em 0
+            temperatura = 150; // Definir a temperatura como 150°C
+            return;
+        }
+
+        if (temperatura > 150) {
+            // Se a temperatura ultrapassar 150°C, o motor avaria
+            cout << "ALERTA: A temperatura do motor excedeu 150°C. O motor avariou!\n";
+            rpm = 0; // O motor avariou, coloca RPM em 0
+            temperatura = 150; // Definir a temperatura como 150°C
+        } else if (temperatura > 130) {
+            // Se a temperatura ultrapassar 130°C, o motor entra em superaquecimento
+            cout << "ALERTA: O motor está em superaquecimento! Temperatura: " << temperatura << "°C\n";
+        } else {
+            // Temperatura normal ou em aumento
+            cout << "Temperatura do motor: " << temperatura << " °C\n";
+        }
+    }
+
+    // Função para exibir o estado do carro
+    void exibirEstado() {
+        cout << "\n=== Estado Atual do Carro ===\n";
+        cout << "RPM: " << rpm << " RPM\n";
+        cout << "Temperatura do motor: " << temperatura << " °C\n";
+        if (freioDeMao) {
+            cout << "Freio de mão: Engatado\n";
+        } else {
+            cout << "Freio de mão: Liberado\n";
+        }
+        cout << "==============================\n";
+    }
+};
+
+int main() {
+    Carro carro;
+    int opcao;
+    int valor;
+
+    do {
+        cout << "\n=== Menu ===\n";
+        cout << "1. Acelerar\n";
+        cout << "2. Acionar Freio de Mão\n";
+        cout << "3. Liberar Freio de Mão\n";
+        cout << "4. Exibir Estado do Carro\n";
+        cout << "0. Sair\n";
+        cout << "Escolha uma opcao: ";
+        cin >> opcao;
+
+        switch (opcao) {
+        case 1:
+            cout << "Quanto deseja acelerar (em RPM)? ";
+            cin >> valor;
+            carro.acelerar(valor);
+            break;
+        case 2:
+            carro.acionarFreioDeMao();
+            break;
+        case 3:
+            carro.liberarFreioDeMao();
+            break;
+        case 4:
+            carro.exibirEstado();
+            break;
+        case 0:
+            cout << "Saindo...\n";
+            break;
+        default:
+            cout << "Opção inválida. Tente novamente.\n";
+        }
+    } while (opcao != 0);
+
+    return 0;
+}
